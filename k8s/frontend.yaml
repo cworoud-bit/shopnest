@@ -26,7 +26,7 @@ spec:
       securityContext: { runAsNonRoot: true, runAsUser: 101, runAsGroup: 101, seccompProfile: { type: RuntimeDefault } }
       containers:
         - name: frontend
-          image: shopnest/frontend:1.0.0
+          image: shopnest/frontend:1.0.1
           imagePullPolicy: IfNotPresent
           ports: [{ name: http, containerPort: 8080 }]
           resources:
