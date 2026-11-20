@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ShopNest</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#6b7280;--ac:#2563eb;--bd:#e5e7eb}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#171c23;--tx:#e8eaed;--mut:#9aa3af;--ac:#60a5fa;--bd:#2a313b}}
+*{box-sizing:border-box}body{margin:0;font:15px system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:var(--card);border-bottom:1px solid var(--bd)}
+main{max-width:980px;margin:24px auto;padding:0 16px;display:grid;gap:20px;grid-template-columns:2fr 1fr}
+@media(max-width:760px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.p{border:1px solid var(--bd);border-radius:8px;padding:12px;text-align:center}.p .e{font-size:34px}
+button{background:var(--ac);color:#fff;border:0;border-radius:6px;padding:7px 12px;cursor:pointer}
+button.s{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+input{width:100%;padding:8px;margin:4px 0;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx)}
+.m{color:var(--mut);font-size:13px}h3{margin:0 0 10px}.row{display:flex;justify-content:space-between;gap:8px;margin:6px 0}
+</style></head><body>
+<header><b>🛒 ShopNest</b><span id="who" class="m"></span></header>
+<main>
+ <section class="card"><h3>Products</h3><div id="products" class="grid"></div></section>
+ <aside style="display:grid;gap:20px;align-content:start">
+  <section class="card" id="auth"><h3>Account</h3>
+   <input id="name" placeholder="Name (register only)"><input id="email" placeholder="Email"><input id="pw" type="password" placeholder="Password">
+   <div class="row"><button onclick="login()">Login</button><button class="s" onclick="register()">Register</button></div><div id="msg" class="m"></div></section>
+  <section class="card"><h3>Cart</h3><div id="cart" class="m">Empty</div><button onclick="checkout()" style="margin-top:8px">Checkout</button></section>
+  <section class="card"><h3>My orders</h3><div id="orders" class="m">Login to see orders</div></section>
+ </aside>
+</main>
+<script>
+let token=localStorage.getItem('t'),user=JSON.parse(localStorage.getItem('u')||'null'),cart={},prods={};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})}});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);return j}
+function setAuth(d){token=d.token;user=d.user;localStorage.setItem('t',token);localStorage.setItem('u',JSON.stringify(user));refresh()}
+async function login(){try{setAuth(await api('/api/users/login',{method:'POST',body:JSON.stringify({email:$('email').value,password:$('pw').value})}))}catch(e){$('msg').textContent=e.message}}
+async function register(){try{setAuth(await api('/api/users/register',{method:'POST',body:JSON.stringify({name:$('name').value,email:$('email').value,password:$('pw').value})}))}catch(e){$('msg').textContent=e.message}}
+function add(id){cart[id]=(cart[id]||0)+1;drawCart()}
+function drawCart(){const k=Object.keys(cart);$('cart').innerHTML=k.length?k.map(id=>`<div class="row"><span>${esc(prods[id].name)} × ${cart[id]}</span><span>$${(prods[id].price*cart[id]).toFixed(2)}</span></div>`).join(''):'Empty'}
+async function checkout(){if(!token)return alert('Login first');const items=Object.entries(cart).map(([productId,qty])=>({productId,qty}));if(!items.length)return;
+  try{await api('/api/orders',{method:'POST',body:JSON.stringify({items})});cart={};drawCart();loadOrders()}catch(e){alert(e.message)}}
+async function loadOrders(){if(!token)return;try{const o=await api('/api/orders');$('orders').innerHTML=o.length?o.map(x=>`<div class="row"><span>#${x.id} · ${esc(x.status)}</span><b>$${x.total}</b></div>`).join(''):'No orders yet'}catch{}}
+function refresh(){$('who').textContent=user?('Hi, '+user.name):'';$('msg').textContent='';loadOrders()}
+(async()=>{const l=await api('/api/products');l.forEach(p=>prods[p._id]=p);
+ $('products').innerHTML=l.map(p=>`<div class="p"><div class="e">${esc(p.emoji)}</div><b>${esc(p.name)}</b><div class="m">${esc(p.category)}</div><div>$${p.price.toFixed(2)}</div><button onclick="add('${p._id}')" style="margin-top:6px">Add</button></div>`).join('');refresh()})();
+</script></body></html>

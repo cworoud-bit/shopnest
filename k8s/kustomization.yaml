@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: shopnest
+resources:
+  - namespace.yaml
+  - quota.yaml
+  - config.yaml
+  - postgres.yaml
+  - mongo.yaml
+  - user-service.yaml
+  - catalog-service.yaml
+  - order-service.yaml
+  - frontend.yaml
+  - ingress.yaml
+  - networkpolicies.yaml
+configMapGenerator:
+  - name: postgres-init
+    files: [init.sql=postgres-init.sql]
+generatorOptions: { disableNameSuffixHash: true }
+# To use images pushed by CI to GHCR instead of locally imported ones, uncomment and edit:
+# images:
+#   - { name: shopnest/frontend,        newName: ghcr.io/YOUR_USER/shopnest-frontend,        newTag: latest }
+#   - { name: shopnest/user-service,    newName: ghcr.io/YOUR_USER/shopnest-user-service,    newTag: latest }
+#   - { name: shopnest/catalog-service, newName: ghcr.io/YOUR_USER/shopnest-catalog-service, newTag: latest }
+#   - { name: shopnest/order-service,   newName: ghcr.io/YOUR_USER/shopnest-order-service,   newTag: latest }

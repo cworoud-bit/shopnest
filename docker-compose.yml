@@ -1,0 +1,38 @@
+# Local development only. Production = K3s (see k8s/).
+services:
+  frontend:
+    build: ./frontend
+    ports: ["8080:8080"]
+    depends_on: [user-service, catalog-service, order-service]
+  user-service:
+    build: ./services/user-service
+    environment: &pg
+      DB_HOST: postgres
+      DB_NAME: usersdb
+      DB_USER: shop
+      DB_PASSWORD: devpassword
+      JWT_SECRET: dev-secret-change-me
+    depends_on: [postgres]
+  order-service:
+    build: ./services/order-service
+    environment:
+      <<: *pg
+      DB_NAME: ordersdb
+      CATALOG_URL: http://catalog-service:3002
+    depends_on: [postgres, catalog-service]
+  catalog-service:
+    build: ./services/catalog-service
+    environment:
+      MONGO_URL: mongodb://shop:devpassword@mongo:27017/?authSource=admin
+    depends_on: [mongo]
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: shop, POSTGRES_PASSWORD: devpassword }
+    volumes:
+      - ./k8s/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - pgdata:/var/lib/postgresql/data
+  mongo:
+    image: mongo:7
+    environment: { MONGO_INITDB_ROOT_USERNAME: shop, MONGO_INITDB_ROOT_PASSWORD: devpassword }
+    volumes: [mongodata:/data/db]
+volumes: { pgdata: {}, mongodata: {} }

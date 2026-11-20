@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata: { name: user-service, namespace: shopnest }
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: Service
+metadata: { name: user-service, namespace: shopnest, labels: { app: user-service } }
+spec:
+  selector: { app: user-service }
+  ports: [{ name: http, port: 3001, targetPort: http }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: user-service, namespace: shopnest, labels: { app: user-service } }
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  strategy: { type: RollingUpdate, rollingUpdate: { maxUnavailable: 0, maxSurge: 1 } }
+  selector: { matchLabels: { app: user-service } }
+  template:
+    metadata: { labels: { app: user-service, tier: app } }
+    spec:
+      serviceAccountName: user-service
+      automountServiceAccountToken: false
+      securityContext: { runAsNonRoot: true, runAsUser: 1000, runAsGroup: 1000, seccompProfile: { type: RuntimeDefault } }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: { matchLabels: { app: user-service } }
+      containers:
+        - name: user-service
+          image: shopnest/user-service:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 3001 }]
+          env:
+            - { name: DB_HOST, valueFrom: { configMapKeyRef: { name: app-config, key: DB_HOST } } }
+            - { name: DB_NAME, valueFrom: { configMapKeyRef: { name: app-config, key: USERS_DB_NAME } } }
+            - { name: DB_USER, valueFrom: { secretKeyRef: { name: postgres-credentials, key: username } } }
+            - { name: DB_PASSWORD, valueFrom: { secretKeyRef: { name: postgres-credentials, key: password } } }
+            - { name: JWT_SECRET, valueFrom: { secretKeyRef: { name: jwt-secret, key: secret } } }
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 300m, memory: 256Mi }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+          startupProbe:   { httpGet: { path: /healthz, port: http }, periodSeconds: 3, failureThreshold: 30 }
+          readinessProbe: { httpGet: { path: /readyz, port: http }, periodSeconds: 10, timeoutSeconds: 3 }
+          livenessProbe:  { httpGet: { path: /healthz, port: http }, periodSeconds: 20, timeoutSeconds: 3 }
+          lifecycle: { preStop: { exec: { command: [sh, -c, "sleep 5"] } } }
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: user-service, namespace: shopnest }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: user-service }
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: user-service, namespace: shopnest }
+spec:
+  minAvailable: 1
+  selector: { matchLabels: { app: user-service } }
