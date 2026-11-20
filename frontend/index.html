@@ -2,46 +2,89 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ShopNest</title>
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#6b7280;--ac:#2563eb;--bd:#e5e7eb}
-@media(prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#171c23;--tx:#e8eaed;--mut:#9aa3af;--ac:#60a5fa;--bd:#2a313b}}
-*{box-sizing:border-box}body{margin:0;font:15px system-ui,sans-serif;background:var(--bg);color:var(--tx)}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:var(--card);border-bottom:1px solid var(--bd)}
-main{max-width:980px;margin:24px auto;padding:0 16px;display:grid;gap:20px;grid-template-columns:2fr 1fr}
-@media(max-width:760px){main{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
-.p{border:1px solid var(--bd);border-radius:8px;padding:12px;text-align:center}.p .e{font-size:34px}
-button{background:var(--ac);color:#fff;border:0;border-radius:6px;padding:7px 12px;cursor:pointer}
-button.s{background:transparent;color:var(--ac);border:1px solid var(--ac)}
-input{width:100%;padding:8px;margin:4px 0;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx)}
-.m{color:var(--mut);font-size:13px}h3{margin:0 0 10px}.row{display:flex;justify-content:space-between;gap:8px;margin:6px 0}
+:root{--bg:#f4f6fb;--card:#fff;--tx:#0f172a;--mut:#64748b;--ac:#4f46e5;--ac2:#7c3aed;--bd:#e2e8f0;--ok:#16a34a;--err:#dc2626;--sh:0 1px 2px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.06)}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#141a2e;--tx:#e6e9f5;--mut:#94a3b8;--ac:#818cf8;--ac2:#a78bfa;--bd:#243049;--sh:0 8px 24px rgba(0,0,0,.35)}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:12px 28px;background:linear-gradient(90deg,#4f46e5,#7c3aed);color:#fff;box-shadow:var(--sh)}
+.brand{font-size:19px;font-weight:700;letter-spacing:.2px}.pill{background:rgba(255,255,255,.18);padding:5px 12px;border-radius:999px;font-size:13px}
+main{max-width:1120px;margin:26px auto;padding:0 18px;display:grid;grid-template-columns:1fr 340px;gap:22px}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;box-shadow:var(--sh)}
+.col{display:grid;gap:18px;align-content:start}h2{margin:0 0 12px;font-size:17px}.m{color:var(--mut);font-size:13px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{border:1px solid var(--bd);background:transparent;color:var(--tx);padding:6px 14px;border-radius:999px;cursor:pointer;font-size:13px;text-transform:capitalize}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.p{border:1px solid var(--bd);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;transition:transform .15s,box-shadow .15s}
+.p:hover{transform:translateY(-3px);box-shadow:var(--sh)}
+.ic{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-size:32px;margin:0 auto 4px;background:linear-gradient(135deg,#e0e7ff,#fae8ff)}
+.hardware .ic{background:linear-gradient(135deg,#dbeafe,#e0e7ff)}.books .ic{background:linear-gradient(135deg,#dcfce7,#d1fae5)}.audio .ic{background:linear-gradient(135deg,#fae8ff,#ffe4e6)}
+.p b{text-align:center}.tag{align-self:center;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut)}
+.price{text-align:center;font-size:18px;font-weight:700}
+button{font:inherit;cursor:pointer;border:0;border-radius:9px;padding:8px 14px;background:var(--ac);color:#fff;transition:opacity .15s}
+button:hover{opacity:.88}button.s{background:transparent;color:var(--ac);border:1px solid var(--ac)}button.w{width:100%}button:disabled{opacity:.5;cursor:default}
+header button{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);padding:5px 12px}
+input{width:100%;padding:10px 12px;margin:5px 0;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit}
+input:focus{outline:2px solid var(--ac);border-color:transparent}
+.tabs{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:10px}.tabs button{flex:1;background:transparent;color:var(--mut)}.tabs button.on{background:var(--card);color:var(--tx);box-shadow:var(--sh)}
+.me{display:flex;gap:12px;align-items:center}.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;background:linear-gradient(135deg,var(--ac),var(--ac2))}
+.line{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--bd)}
+.q{display:flex;align-items:center;gap:6px}.q button{padding:0;width:26px;height:26px;border-radius:7px}
+.tot{display:flex;justify-content:space-between;font-size:17px;font-weight:700;margin:12px 0}
+.ord{padding:10px 0;border-bottom:1px solid var(--bd)}.ord:last-child{border:0}.badge{background:#dcfce7;color:#166534;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#0f172a;color:#fff;padding:11px 18px;border-radius:10px;opacity:0;transition:.3s;z-index:9}
+#toast.show{transform:translateX(-50%);opacity:1}#toast.err{background:var(--err)}#toast.ok{background:var(--ok)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
 </style></head><body>
-<header><b>🛒 ShopNest</b><span id="who" class="m"></span></header>
+<header><span class="brand">🛒 ShopNest</span><span id="top"></span></header>
 <main>
- <section class="card"><h3>Products</h3><div id="products" class="grid"></div></section>
- <aside style="display:grid;gap:20px;align-content:start">
-  <section class="card" id="auth"><h3>Account</h3>
-   <input id="name" placeholder="Name (register only)"><input id="email" placeholder="Email"><input id="pw" type="password" placeholder="Password">
-   <div class="row"><button onclick="login()">Login</button><button class="s" onclick="register()">Register</button></div><div id="msg" class="m"></div></section>
-  <section class="card"><h3>Cart</h3><div id="cart" class="m">Empty</div><button onclick="checkout()" style="margin-top:8px">Checkout</button></section>
-  <section class="card"><h3>My orders</h3><div id="orders" class="m">Login to see orders</div></section>
+ <section class="card"><h2>Products</h2><div id="chips" class="chips"></div><div id="products" class="grid"><span class="m">Loading…</span></div></section>
+ <aside class="col">
+  <section class="card" id="auth"></section>
+  <section class="card"><h2>🧺 Cart</h2><div id="cart"></div></section>
+  <section class="card"><h2>📦 My orders</h2><div id="orders" class="m">Login to see your orders</div></section>
  </aside>
 </main>
+<footer>Frontend → Traefik Ingress → 3 microservices on K3s · PostgreSQL + MongoDB</footer>
+<div id="toast"></div>
 <script>
-let token=localStorage.getItem('t'),user=JSON.parse(localStorage.getItem('u')||'null'),cart={},prods={};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'$'+Number(n).toFixed(2);
+let token=localStorage.getItem('t'),user=JSON.parse(localStorage.getItem('u')||'null'),cart={},prods={},cat='all',mode='login';
 async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})}});
-  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);return j}
-function setAuth(d){token=d.token;user=d.user;localStorage.setItem('t',token);localStorage.setItem('u',JSON.stringify(user));refresh()}
-async function login(){try{setAuth(await api('/api/users/login',{method:'POST',body:JSON.stringify({email:$('email').value,password:$('pw').value})}))}catch(e){$('msg').textContent=e.message}}
-async function register(){try{setAuth(await api('/api/users/register',{method:'POST',body:JSON.stringify({name:$('name').value,email:$('email').value,password:$('pw').value})}))}catch(e){$('msg').textContent=e.message}}
-function add(id){cart[id]=(cart[id]||0)+1;drawCart()}
-function drawCart(){const k=Object.keys(cart);$('cart').innerHTML=k.length?k.map(id=>`<div class="row"><span>${esc(prods[id].name)} × ${cart[id]}</span><span>$${(prods[id].price*cart[id]).toFixed(2)}</span></div>`).join(''):'Empty'}
-async function checkout(){if(!token)return alert('Login first');const items=Object.entries(cart).map(([productId,qty])=>({productId,qty}));if(!items.length)return;
-  try{await api('/api/orders',{method:'POST',body:JSON.stringify({items})});cart={};drawCart();loadOrders()}catch(e){alert(e.message)}}
-async function loadOrders(){if(!token)return;try{const o=await api('/api/orders');$('orders').innerHTML=o.length?o.map(x=>`<div class="row"><span>#${x.id} · ${esc(x.status)}</span><b>$${x.total}</b></div>`).join(''):'No orders yet'}catch{}}
-function refresh(){$('who').textContent=user?('Hi, '+user.name):'';$('msg').textContent='';loadOrders()}
-(async()=>{const l=await api('/api/products');l.forEach(p=>prods[p._id]=p);
- $('products').innerHTML=l.map(p=>`<div class="p"><div class="e">${esc(p.emoji)}</div><b>${esc(p.name)}</b><div class="m">${esc(p.category)}</div><div>$${p.price.toFixed(2)}</div><button onclick="add('${p._id}')" style="margin-top:6px">Add</button></div>`).join('');refresh()})();
+ const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('Error '+r.status));return j}
+let tt;function toast(t,type){const e=$('toast');e.textContent=t;e.className='show '+(type||'');clearTimeout(tt);tt=setTimeout(()=>e.className='',3200)}
+function drawTop(){$('top').innerHTML=user?`<span class="pill">${esc(user.name)} · ${esc(user.email)}</span> <button onclick="logout()">Logout</button>`:''}
+function drawAuth(){
+ if(user){$('auth').innerHTML=`<div class="me"><div class="av">${esc(user.name[0]||'?').toUpperCase()}</div><div><b>${esc(user.name)}</b><div class="m">${esc(user.email)}</div></div></div><button class="s w" style="margin-top:14px" onclick="logout()">Logout</button>`;return}
+ $('auth').innerHTML=`<h2>Account</h2><div class="tabs"><button class="${mode=='login'?'on':''}" onclick="setMode('login')">Login</button><button class="${mode=='register'?'on':''}" onclick="setMode('register')">Register</button></div>
+ <form onsubmit="submitAuth(event)">${mode=='register'?'<input id="name" placeholder="Full name" required>':''}<input id="email" type="email" placeholder="Email" required><input id="pw" type="password" placeholder="Password (min 6)" minlength="6" required>
+ <button class="w" style="margin-top:8px">${mode=='login'?'Login':'Create account'}</button></form>`}
+function setMode(m){mode=m;drawAuth()}
+async function submitAuth(e){e.preventDefault();const body={email:$('email').value.trim().toLowerCase(),password:$('pw').value};if(mode=='register')body.name=$('name').value.trim();
+ try{const d=await api('/api/users/'+mode,{method:'POST',body:JSON.stringify(body)});token=d.token;user=d.user;localStorage.setItem('t',token);localStorage.setItem('u',JSON.stringify(user));
+  toast('Welcome, '+user.name+' 👋','ok');refresh()}
+ catch(err){toast(err.message==='email already registered'?'Email already registered. Use Login instead.':err.message,'err');if(err.message==='email already registered')setMode('login')}}
+function logout(){token=null;user=null;cart={};localStorage.clear();toast('Logged out');drawCart();refresh()}
+function drawChips(){const cats=['all',...new Set(Object.values(prods).map(p=>p.category))];
+ $('chips').innerHTML=cats.map(c=>`<button class="chip ${c==cat?'on':''}" onclick="cat='${esc(c)}';drawChips();drawProducts()">${esc(c)}</button>`).join('')}
+function drawProducts(){const l=Object.values(prods).filter(p=>cat=='all'||p.category==cat);
+ $('products').innerHTML=l.map(p=>`<div class="p ${esc(p.category)}"><div class="ic">${esc(p.emoji)}</div><b>${esc(p.name)}</b><span class="tag">${esc(p.category)}</span><div class="price">${money(p.price)}</div>
+ <button onclick="add('${esc(p._id)}')">${cart[p._id]?'In cart ×'+cart[p._id]+' · Add more':'Add to cart'}</button></div>`).join('')||'<span class="m">No products</span>'}
+function add(id){cart[id]=(cart[id]||0)+1;drawCart();drawProducts()}
+function chg(id,d){cart[id]=(cart[id]||0)+d;if(cart[id]<=0)delete cart[id];drawCart();drawProducts()}
+function drawCart(){const k=Object.keys(cart);if(!k.length){$('cart').innerHTML='<div class="m">Your cart is empty</div>';return}
+ const total=k.reduce((s,id)=>s+prods[id].price*cart[id],0);
+ $('cart').innerHTML=k.map(id=>`<div class="line"><span>${esc(prods[id].emoji)} ${esc(prods[id].name)}</span><span class="q"><button onclick="chg('${id}',-1)">−</button>${cart[id]}<button onclick="chg('${id}',1)">+</button></span></div>`).join('')
+ +`<div class="tot"><span>Total</span><span>${money(total)}</span></div><button class="w" id="co" onclick="checkout()">Checkout</button>`}
+async function checkout(){if(!token)return toast('Please login first','err');const b=$('co');b.disabled=true;
+ try{const o=await api('/api/orders',{method:'POST',body:JSON.stringify({items:Object.entries(cart).map(([productId,qty])=>({productId,qty}))})});
+  cart={};drawCart();drawProducts();toast('Order #'+o.id+' confirmed ✅','ok');loadOrders()}catch(e){toast(e.message,'err');b.disabled=false}}
+async function loadOrders(){if(!token){$('orders').innerHTML='<span class="m">Login to see your orders</span>';return}
+ try{const o=await api('/api/orders');$('orders').innerHTML=o.length?o.map(x=>`<div class="ord"><div class="line" style="border:0;padding:0"><b>#${x.id}</b><span class="badge">${esc(x.status)}</span><b>${money(x.total)}</b></div>
+  <div class="m">${esc(new Date(x.created_at).toLocaleString())}<br>${x.items.map(i=>esc(i.name)+' ×'+i.qty).join(', ')}</div></div>`).join(''):'<span class="m">No orders yet</span>'}
+ catch(e){if(e.message==='unauthorized'){token=null;user=null;localStorage.clear();refresh()}}}
+function refresh(){drawTop();drawAuth();loadOrders()}
+(async()=>{refresh();drawCart();try{(await api('/api/products')).forEach(p=>prods[p._id]=p);drawChips();drawProducts()}catch(e){$('products').innerHTML='<span class="m">Could not load products</span>'}})();
 </script></body></html>
